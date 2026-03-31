@@ -7,7 +7,7 @@ import { Image, ImageDocument } from 'libs/schemas/image.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { formatBytesIntl } from 'libs/utils/util_funcs';
-
+import * as sharp from 'sharp';
 @Injectable()
 export class ImageService {
   constructor(
@@ -21,11 +21,14 @@ export class ImageService {
     const key = `images/${random}${extension}`;
     await this.uploadService.uploadFile(key, file.buffer, file.mimetype);
     const url = this.uploadService.getUploadURL(key);
+    const metadata = await sharp(file.buffer).metadata();
     await this.imageModel.create({
       url,
       name: file.originalname,
       size: formatBytesIntl(file.size),
       account: account.id,
+      height: metadata.height,
+      width: metadata.width,
     });
   }
 
@@ -37,8 +40,8 @@ export class ImageService {
 
   deleteImageById(id: string, account: IUser) {
     return this.imageModel.deleteOne({
-        _id: id,
-        account: account.id
-    })
+      _id: id,
+      account: account.id,
+    });
   }
 }

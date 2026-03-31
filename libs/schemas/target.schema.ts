@@ -1,20 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { Project } from './project.schema';
-
-@Schema({ _id: false })
-export class Property {
-  @Prop({ type: [Number] })
-  position: number[];
-
-  @Prop({ type: [Number] })
-  rotation: number[];
-
-  @Prop({ type: [Number] })
-  scale: number[];
-}
-
-const PropertySchema = SchemaFactory.createForClass(Property);
 
 @Schema({ _id: false })
 export class Text {
@@ -37,8 +23,14 @@ export class Content {
   @Prop({ type: String, enum: ['text', 'image', 'video'] })
   type: 'text' | 'image' | 'video';
 
-  @Prop({ type: PropertySchema, required: false })
-  properties: Property;
+  @Prop({ type: [Number] })
+  position: number[];
+
+  @Prop({ type: [Number] })
+  rotation: number[];
+
+  @Prop({ type: [Number] })
+  scale: number[];
 
   @Prop({ type: TextSchema, required: false })
   text: Text;
@@ -61,6 +53,9 @@ export class Target {
 
   @Prop({ type: [ContentSchema] })
   contents: Content[];
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Project' })
+  project: Project;
 }
 
 export type TargetDocument = HydratedDocument<Target>;

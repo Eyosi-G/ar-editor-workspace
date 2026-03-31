@@ -56,7 +56,7 @@ export class ImageController {
     },
   })
   @UseGuards(AuthGuard)
-  async uploadStampIcon(
+  async createImage(
     @UploadedFile() file: Express.Multer.File,
     @User() account: IUser,
   ) {

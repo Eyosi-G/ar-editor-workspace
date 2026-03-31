@@ -12,6 +12,12 @@ export class Image {
   @Prop({ type: String})
   size: string;
 
+  @Prop({ type: Number })
+  height: number;
+
+  @Prop({ type: Number })
+  width: number;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: Account;
 }
