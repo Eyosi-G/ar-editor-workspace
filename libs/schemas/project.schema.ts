@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Account } from './account.schema';
+import { Target, TargetSchema } from './target.schema';
 
 @Schema({ timestamps: true })
 export class Project {
@@ -12,6 +13,9 @@ export class Project {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: Account;
+
+  @Prop({ type: [TargetSchema]})
+  targets: Target[]
 }
 
 export type ProjectDocument = HydratedDocument<Project>;

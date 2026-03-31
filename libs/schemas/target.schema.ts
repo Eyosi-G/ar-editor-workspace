@@ -54,9 +54,9 @@ export class Target {
   @Prop({ type: [ContentSchema] })
   contents: Content[];
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Project' })
-  project: Project;
+//   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Project' })
+//   project: Project;
 }
 
-export type TargetDocument = HydratedDocument<Target>;
+// export type TargetDocument = HydratedDocument<Target>;
 export const TargetSchema = SchemaFactory.createForClass(Target);
