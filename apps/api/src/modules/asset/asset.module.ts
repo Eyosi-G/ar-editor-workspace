@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ImageService } from './image.service';
-import { ImageController } from './image.controller';
+import { AssetService } from './asset.service';
+import { AssetController } from './asset.controller';
 import { UploadModule } from '@app/upload';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Image, ImageSchema } from 'libs/schemas/image.schema';
+import { Asset, AssetSchema } from 'libs/schemas/asset.schema';
 import { AuthGuard } from '../../guards/auth.guard';
 import { Account, AccountSchema } from 'libs/schemas/account.schema';
 
@@ -11,11 +11,11 @@ import { Account, AccountSchema } from 'libs/schemas/account.schema';
   imports: [
     UploadModule,
     MongooseModule.forFeature([
-      { name: Image.name, schema: ImageSchema },
+      { name: Asset.name, schema: AssetSchema },
       { name: Account.name, schema: AccountSchema },
     ]),
   ],
-  controllers: [ImageController],
-  providers: [ImageService, AuthGuard],
+  controllers: [AssetController],
+  providers: [AssetService, AuthGuard],
 })
-export class ImageModule {}
+export class AssetModule {}

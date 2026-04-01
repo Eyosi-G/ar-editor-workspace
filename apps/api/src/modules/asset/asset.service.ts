@@ -3,43 +3,53 @@ import { IUser } from '../../decorators/user.decorator';
 import { UploadService } from '@app/upload';
 import { extname } from 'path';
 import { randomUUID } from 'crypto';
-import { Image, ImageDocument } from 'libs/schemas/image.schema';
+import { Asset, AssetDocument } from 'libs/schemas/asset.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { formatBytesIntl } from 'libs/utils/util_funcs';
 import * as sharp from 'sharp';
 @Injectable()
-export class ImageService {
+export class AssetService {
   constructor(
     private readonly uploadService: UploadService,
-    @InjectModel(Image.name) private imageModel: Model<ImageDocument>,
+    @InjectModel(Asset.name) private assetModel: Model<AssetDocument>,
   ) {}
 
-  async createImage(file: Express.Multer.File, account: IUser) {
+  async createAsset(file: Express.Multer.File, account: IUser) {
     const extension = extname(file.originalname);
     const random = randomUUID();
-    const key = `images/${random}${extension}`;
+    const key = `assets/${random}${extension}`;
     await this.uploadService.uploadFile(key, file.buffer, file.mimetype);
     const url = this.uploadService.getUploadURL(key);
-    const metadata = await sharp(file.buffer).metadata();
-    await this.imageModel.create({
+
+    let type = 'image';
+    const imageMimes = ['image/jpeg', 'image/png'];
+    const meshMimes = ['model/gltf-binary', 'model/gltf+json'];
+    const audioMimes = ['audio/mpeg', 'audio/wav'];
+    if (imageMimes.includes(file.mimetype)) {
+      type = 'image';
+    } else if (meshMimes.includes(file.mimetype)) {
+      type = 'mesh';
+    } else if (audioMimes.includes(file.mimetype)) {
+      type = 'audio';
+    }
+    await this.assetModel.create({
       url,
       name: file.originalname,
       size: formatBytesIntl(file.size),
       account: account.id,
-      height: metadata.height,
-      width: metadata.width,
+      type,
     });
   }
 
-  getImages(account: IUser) {
-    return this.imageModel.find({
+  getAssets(account: IUser) {
+    return this.assetModel.find({
       account: account.id,
     });
   }
 
-  deleteImageById(id: string, account: IUser) {
-    return this.imageModel.deleteOne({
+  deleteAssetById(id: string, account: IUser) {
+    return this.assetModel.deleteOne({
       _id: id,
       account: account.id,
     });

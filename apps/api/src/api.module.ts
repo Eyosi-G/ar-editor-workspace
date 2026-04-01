@@ -5,11 +5,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import appConfig from 'libs/config/app.config';
 import { JwtModule } from '@nestjs/jwt';
 import { ProjectModule } from './modules/project/project.module';
-import { ImageModule } from './modules/image/image.module';
+import { AssetModule } from './modules/asset/asset.module';
 
 @Module({
   imports: [
-   
     JwtModule.register({
       global: true,
     }),
@@ -26,7 +25,7 @@ import { ImageModule } from './modules/image/image.module';
     }),
     AuthModule,
     ProjectModule,
-    ImageModule
+    AssetModule
   ],
   controllers: [],
   providers: [],
