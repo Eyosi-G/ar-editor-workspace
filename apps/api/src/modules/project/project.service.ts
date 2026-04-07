@@ -4,6 +4,7 @@ import { IUser } from '../../decorators/user.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { Project, ProjectDocument } from 'libs/schemas/project.schema';
 import { Model } from 'mongoose';
+import { ContentType, UpdateTargetsDto } from './dto/update-target.dto';
 
 @Injectable()
 export class ProjectService {
@@ -46,5 +47,55 @@ export class ProjectService {
         is_published: true,
       },
     );
+  }
+
+  async updateTargets(account: IUser, updateTargetDto: UpdateTargetsDto) {
+    await this.projectModel.updateOne({
+      id: updateTargetDto.projectId,
+      account: account.id,
+      targets: updateTargetDto.targets.map((target) => {
+        return {
+          name: target.name,
+          img_src: target.imgSrc,
+          height: target.height,
+          width: target.width,
+          contents: target.contents.map((content) => {
+            return {
+              name: content.name,
+              type: content.type,
+              position: content.position,
+              scale: content.scale,
+              rotation: content.rotation,
+              text:
+                content.type == ContentType.TEXT
+                  ? {
+                      value: content.text.value,
+                      fontSize: content.text.fontSize,
+                      fontWeight: content.text.fontWeight,
+                    }
+                  : undefined,
+              image:
+                content.type == ContentType.IMAGE
+                  ? {
+                      value: content.image.value,
+                      height: content.image.height,
+                      width: content.image.width,
+                    }
+                  : undefined,
+              embeded:
+                content.type == ContentType.EMBEDED
+                  ? {
+                      value: content.embeded.value,
+                      service: content.embeded.service,
+                      autoplay: content.embeded.autoplay,
+                      loop: content.embeded.loop,
+                      muted: content.embeded.muted,
+                    }
+                  : undefined,
+            };
+          }),
+        };
+      }),
+    });
   }
 }

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '../../guards/auth.guard';
 import { IUser, User } from '../../decorators/user.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateTargetsDto } from './dto/update-target.dto';
 
 @ApiBearerAuth()
 @Controller('projects')
@@ -29,6 +30,12 @@ export class ProjectController {
   @Get(":id")
   getProjectById(@User() account: IUser, @Param("id") id: string) {
     return this.projectService.getProjectById(account, id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put("update-targets")
+  updateTargets(@User() account: IUser, @Body() updateTargetDto: UpdateTargetsDto) {
+    return this.projectService.updateTargets(account, updateTargetDto);
   }
 
   @UseGuards(AuthGuard)
