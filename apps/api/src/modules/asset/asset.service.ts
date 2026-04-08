@@ -22,6 +22,8 @@ export class AssetService {
     await this.uploadService.uploadFile(key, file.buffer, file.mimetype);
     const url = this.uploadService.getUploadURL(key);
 
+    console.log(url)
+    console.log(file)
     let type = 'image';
     const imageMimes = ['image/jpeg', 'image/png'];
     const meshMimes = ['model/gltf-binary', 'model/gltf+json'];
@@ -36,7 +38,7 @@ export class AssetService {
     await this.assetModel.create({
       url,
       name: file.originalname,
-      size: formatBytesIntl(file.size),
+      size: file.size,
       account: account.id,
       type,
     });
