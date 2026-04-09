@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '../../guards/auth.guard';
@@ -13,11 +13,11 @@ export class ProjectController {
 
   @UseGuards(AuthGuard)
   @Post()
-  createProject(
+  async createProject(
     @Body() createProjectDto: CreateProjectDto,
     @User() account: IUser,
   ) {
-    this.projectService.createProject(account, createProjectDto);
+    await this.projectService.createProject(account, createProjectDto);
   }
 
   @UseGuards(AuthGuard)
@@ -30,6 +30,12 @@ export class ProjectController {
   @Get(":id")
   getProjectById(@User() account: IUser, @Param("id") id: string) {
     return this.projectService.getProjectById(account, id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(":id")
+  deleteProjectById(@User() account: IUser, @Param("id") id: string) {
+    return this.projectService.deleteProjectById(account, id);
   }
 
   @UseGuards(AuthGuard)

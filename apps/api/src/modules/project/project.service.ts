@@ -98,4 +98,8 @@ export class ProjectService {
       }),
     });
   }
+
+ async deleteProjectById(account: IUser, id: string) {
+    await this.projectModel.findOneAndDelete({ account: account.id, _id: id });
+  }
 }
