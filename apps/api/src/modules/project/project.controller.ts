@@ -1,10 +1,27 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AuthGuard } from '../../guards/auth.guard';
 import { IUser, User } from '../../decorators/user.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateTargetsDto } from './dto/update-target.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import * as path from 'path';
+import { Express } from 'express';
 
 @ApiBearerAuth()
 @Controller('projects')
@@ -27,26 +44,62 @@ export class ProjectController {
   }
 
   @UseGuards(AuthGuard)
-  @Get(":id")
-  getProjectById(@User() account: IUser, @Param("id") id: string) {
+  @Get(':id')
+  getProjectById(@User() account: IUser, @Param('id') id: string) {
     return this.projectService.getProjectById(account, id);
   }
 
+  @Get(':id/published')
+  getPublishedProjectById(@Param('id') id: string) {
+    return this.projectService.getPublishedProjectById(id);
+  }
+
+
   @UseGuards(AuthGuard)
-  @Delete(":id")
-  deleteProjectById(@User() account: IUser, @Param("id") id: string) {
+  @Delete(':id')
+  deleteProjectById(@User() account: IUser, @Param('id') id: string) {
     return this.projectService.deleteProjectById(account, id);
   }
 
   @UseGuards(AuthGuard)
-  @Put("update-targets")
-  updateTargets(@User() account: IUser, @Body() updateTargetDto: UpdateTargetsDto) {
+  @Put('update-targets')
+  updateTargets(
+    @User() account: IUser,
+    @Body() updateTargetDto: UpdateTargetsDto,
+  ) {
     return this.projectService.updateTargets(account, updateTargetDto);
   }
 
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter(req, file, callback) {
+        const maxSize = 1024 * 1024 * 1;
+        if (file.size > maxSize) {
+          return callback(
+            new BadRequestException('file must be less than 1mb'),
+            false,
+          );
+        }
+        console.log(file)
+        const ext = path.extname(file.originalname);
+        if (ext != '.mind') {
+          return callback(
+            new BadRequestException('file format not allowed'),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @UseGuards(AuthGuard)
-  @Patch(":id/publish")
-  publishProject(@User() account: IUser, @Param("id") id: string) {
-    return this.projectService.publishProject(account, id);
+  @Post(':id/publish')
+  async publishProject(
+    @User() account: IUser,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    await this.projectService.publishProject(id, account, file);
   }
 }

@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -18,20 +18,36 @@ enum TextWeight {
   BOLD = 'bold',
 }
 
+enum TextAlignment {
+  LEFT = 'left',
+  CENTER = 'center',
+  RIGHT = 'right',
+  JUSTIFY = 'justify',
+}
+
 class TextDto {
   @IsString()
   value: string;
 
   @IsNumber()
-  fontSize: number = 12;
+  fontsize: number = 0.5;
 
   @IsEnum(TextWeight)
-  fontWeight: TextWeight = TextWeight.BOLD;
+  fontweight: TextWeight = TextWeight.BOLD;
+
+  @IsEnum(TextAlignment)
+  alignment: TextAlignment = TextAlignment.LEFT;
 }
 
 class ImageDto {
   @IsString()
   value: string;
+
+
+  @IsOptional()
+  @IsString()
+  link?: string;
+
 
   @IsNumber()
   height: number;
@@ -46,7 +62,7 @@ export enum EmbededValueType {
 
 class EmbededDto {
   @IsString()
-  value: string;
+  videoId: string;
 
   @IsEnum(EmbededValueType)
   service: string;
@@ -69,11 +85,12 @@ class EmbededDto {
   @Type(() => Boolean)
   muted: boolean;
 
-  @IsNumber()
-  height: number;
+  @ValidateIf((o) => o.service == EmbededValueType.YOUTUBE)
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  control: boolean;
 
-  @IsNumber()
-  width: number;
 }
 
 export enum ContentType {
@@ -82,6 +99,9 @@ export enum ContentType {
   EMBEDED = 'embeded',
 }
 class ContentDto {
+  @IsString()
+  id: string;
+
   @IsString()
   name: string;
 
@@ -106,16 +126,19 @@ class ContentDto {
   @IsNumber({}, { each: true })
   scale: number[];
 
+  @IsOptional()
   @ValidateIf((o) => o.type === ContentType.TEXT)
   @ValidateNested()
   @Type(() => TextDto)
   text?: TextDto;
 
+  @IsOptional()
   @ValidateIf((o) => o.type === ContentType.IMAGE)
   @ValidateNested()
   @Type(() => TextDto)
   image?: ImageDto;
 
+  @IsOptional()
   @ValidateIf((o) => o.type === ContentType.EMBEDED)
   @ValidateNested()
   @Type(() => EmbededDto)
@@ -124,10 +147,13 @@ class ContentDto {
 
 class TargetDto {
   @IsString()
+  id: string;
+
+  @IsString()
   name: string;
 
   @IsString()
-  imgSrc: string;
+  img_src: string;
 
   @IsNumber()
   @IsPositive()
@@ -140,7 +166,10 @@ class TargetDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ContentDto)
-  contents: ContentDto[];
+  @Transform(({ value }) =>
+    value === null || value === undefined ? [] : value,
+  )
+  contents: ContentDto[] = [];
 }
 
 export class UpdateTargetsDto {
@@ -149,6 +178,6 @@ export class UpdateTargetsDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ContentDto)
+  @Type(() => TargetDto)
   targets: TargetDto[];
 }

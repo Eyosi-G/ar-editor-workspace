@@ -22,25 +22,30 @@ export class AssetService {
     await this.uploadService.uploadFile(key, file.buffer, file.mimetype);
     const url = this.uploadService.getUploadURL(key);
 
-    console.log(url)
-    console.log(file)
+    console.log(url);
+    console.log(file);
     let type = 'image';
     const imageMimes = ['image/jpeg', 'image/png'];
     const meshMimes = ['model/gltf-binary', 'model/gltf+json'];
     const audioMimes = ['audio/mpeg', 'audio/wav'];
+    let metadata: sharp.Metadata;
     if (imageMimes.includes(file.mimetype)) {
       type = 'image';
+      metadata = await sharp(file.buffer).metadata();
     } else if (meshMimes.includes(file.mimetype)) {
       type = 'mesh';
     } else if (audioMimes.includes(file.mimetype)) {
       type = 'audio';
     }
+
     await this.assetModel.create({
       url,
       name: file.originalname,
       size: file.size,
       account: account.id,
       type,
+      height: type == 'image' ? metadata.height : undefined,
+      width: type == 'image' ? metadata.width : undefined,
     });
   }
 

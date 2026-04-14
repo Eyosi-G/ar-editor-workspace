@@ -5,10 +5,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Project, ProjectDocument } from 'libs/schemas/project.schema';
 import { Model } from 'mongoose';
 import { ContentType, UpdateTargetsDto } from './dto/update-target.dto';
+import { UploadService } from '@app/upload';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ProjectService {
+  
   constructor(
+    private readonly uploadService: UploadService,
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
   ) {}
 
@@ -40,11 +45,18 @@ export class ProjectService {
     });
   }
 
-  async publishProject(account: IUser, id: string) {
+  async publishProject(id: string, account: IUser,  file: Express.Multer.File) {
+    const extension = path.extname(file.originalname);
+    const random = randomUUID();
+    const key = `assets/${random}${extension}`;
+    await this.uploadService.uploadFile(key, file.buffer, file.mimetype);
+    const url = this.uploadService.getUploadURL(key);
+
     await this.projectModel.findOneAndUpdate(
       { _id: id, account: account.id },
       {
         is_published: true,
+        build_url: url,
       },
     );
   }
@@ -56,41 +68,23 @@ export class ProjectService {
       targets: updateTargetDto.targets.map((target) => {
         return {
           name: target.name,
-          img_src: target.imgSrc,
+          img_src: target.img_src,
           height: target.height,
           width: target.width,
           contents: target.contents.map((content) => {
+            console.log(content.embeded);
             return {
               name: content.name,
               type: content.type,
               position: content.position,
               scale: content.scale,
               rotation: content.rotation,
-              text:
-                content.type == ContentType.TEXT
-                  ? {
-                      value: content.text.value,
-                      fontSize: content.text.fontSize,
-                      fontWeight: content.text.fontWeight,
-                    }
-                  : undefined,
+              text: content.type == ContentType.TEXT ? content.text : undefined,
               image:
-                content.type == ContentType.IMAGE
-                  ? {
-                      value: content.image.value,
-                      height: content.image.height,
-                      width: content.image.width,
-                    }
-                  : undefined,
+                content.type == ContentType.IMAGE ? content.image : undefined,
               embeded:
                 content.type == ContentType.EMBEDED
-                  ? {
-                      value: content.embeded.value,
-                      service: content.embeded.service,
-                      autoplay: content.embeded.autoplay,
-                      loop: content.embeded.loop,
-                      muted: content.embeded.muted,
-                    }
+                  ? content.embeded
                   : undefined,
             };
           }),
@@ -99,7 +93,14 @@ export class ProjectService {
     });
   }
 
- async deleteProjectById(account: IUser, id: string) {
+  async deleteProjectById(account: IUser, id: string) {
     await this.projectModel.findOneAndDelete({ account: account.id, _id: id });
+  }
+
+  getPublishedProjectById(id: string) {
+    return this.projectModel.findOne({
+      is_published: true,
+      _id: id,
+    });
   }
 }

@@ -21,6 +21,9 @@ export class Project {
   @Prop({ type: Boolean, default: false })
   is_published: boolean;
 
+  @Prop({ type: String })
+  build_url: string;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: Account;
 

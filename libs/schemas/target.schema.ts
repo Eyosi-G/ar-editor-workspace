@@ -8,23 +8,32 @@ export class Text {
   value: string;
 
   @Prop({ type: Number })
-  fontSize: number;
+  fontsize: number;
 
   @Prop({ type: String, enum: ['normal', 'bold'] })
-  fontWeight: 'normal' | 'bold';
+  fontweight: 'normal' | 'bold';
+
+  @Prop({ type: String, enum: ['left', 'center', 'right', 'justify'] })
+  alignment: 'left' | 'center' | 'right' | 'justify';
+
+  @Prop({ type: String })
+  color: string;
 }
 
 const TextSchema = SchemaFactory.createForClass(Text);
 
 @Schema({ _id: false })
 export class Image {
-  @Prop({ type: String })
+  @Prop({ type: String, required: false })
   value: string;
 
-  @Prop({ type: Number })
+  @Prop({ type: String })
+  link: string;
+
+  @Prop({ type: Number, required: false })
   height: number;
 
-  @Prop({ type: Number })
+  @Prop({ type: Number, required: false })
   width: number;
 }
 
@@ -33,24 +42,31 @@ const ImageSchema = SchemaFactory.createForClass(Image);
 @Schema({ _id: false })
 export class Embeded {
   @Prop({ type: String, required: true })
-  value: string;
+  videoId: string;
 
   @Prop({ type: String, enum: ['youtube'], default: 'youtube' })
-  service: 'youtube' ;
+  service: 'youtube';
 
-  @Prop({ type: Number })
+  @Prop({ type: Boolean })
   autoplay: boolean;
 
-  @Prop({ type: Number })
+  @Prop({ type: Boolean })
   loop: boolean;
 
   @Prop({ type: Boolean })
   muted: boolean;
+
+  @Prop({ type: Boolean })
+  control: boolean;
 }
 
 const EmbededSchema = SchemaFactory.createForClass(Embeded);
 
+@Schema({ _id: false })
 export class Content {
+  @Prop({ type: String, required: true })
+  id: string;
+
   @Prop({ type: String })
   name: string;
 
@@ -77,8 +93,11 @@ export class Content {
 }
 const ContentSchema = SchemaFactory.createForClass(Content);
 
-@Schema()
+@Schema({ _id: false })
 export class Target {
+  @Prop({ type: String, required: true })
+  id: string;
+
   @Prop({ type: String })
   name: string;
 

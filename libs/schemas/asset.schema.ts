@@ -12,6 +12,12 @@ export class Asset {
   @Prop({ type: Number })
   size: number;
 
+  @Prop({ type: Number })
+  height: number;
+
+  @Prop({ type: Number })
+  width: number;
+
   @Prop({ type: String, enum: ['image', 'audio', 'mesh'] })
   type: 'image' | 'audio' | 'mesh';
 
