@@ -8,4 +8,11 @@ export class CreateProjectDto {
     @MaxLength(100)
     @Transform(({ value }) => value.trim())  
     name: string;
+
+
+    @ApiProperty()
+    @IsString()
+    @MaxLength(100)
+    @Transform(({ value }) => value.trim())  
+    id: string;
 }

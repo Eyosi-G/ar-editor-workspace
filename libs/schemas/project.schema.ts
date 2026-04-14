@@ -8,13 +8,16 @@ import { Target, TargetSchema } from './target.schema';
   toJSON: {
     virtuals: true,
     transform: (_, ret) => {
-      (ret as any).id = ret._id;
+      // (ret as any).id = ret._id;
       delete ret._id;
       delete ret.__v;
     },
   },
 })
 export class Project {
+  @Prop({ type: String, unique: true, })
+  id: string;
+
   @Prop({ type: String })
   name: string;
 
@@ -22,7 +25,10 @@ export class Project {
   is_published: boolean;
 
   @Prop({ type: String })
-  build_url: string;
+  pattern: string;
+
+  @Prop({ type: String })
+  marker: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Account' })
   account: Account;
